@@ -37,10 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'appl'
+    'appl',
+    # 'corsheaders'
 ]
 
 MIDDLEWARE = [
+    # 'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -83,7 +85,7 @@ DATABASES = {
         'PASSWORD': "",
         "NAME": "learning-django",
         "OPTIONS": {
-            'init_command': "SET sql_mode='STRIC_TRANS_TABLES'"
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
         }
     }
 }
@@ -129,3 +131,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# CSRF_TRUSTED_ORIGINS = ["http://localhost","https://www.thunderclient.com"]
