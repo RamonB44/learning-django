@@ -21,6 +21,8 @@ class UserSerializer(serializers.ModelSerializer):
     
     def update(self, validated_data):
         pass
+    
+    
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
