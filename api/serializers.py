@@ -1,9 +1,9 @@
 from rest_framework import serializers
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, Token
 from .models import UserData
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer,TokenRefreshSerializer
 from rest_framework_simplejwt.state import token_backend
-
+from django.conf import settings
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -22,24 +22,41 @@ class UserSerializer(serializers.ModelSerializer):
     def update(self, validated_data):
         pass
     
-    
-
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    
     @classmethod
     def get_token(cls, user):
-        token = RefreshToken.for_user(user)
+        token = super().get_token(user)
+        # we will see this data after decode hash
         # Add custom claims
         token['name'] = user.name
-        token['email'] = user.email
         # ...
         return token
     
-    # def validate(self, attr):
-    #     data = super().validate(attr)
-    #     refresh = self.get_token(self.user)
-    #     data["refresh"] = str(refresh)
-    #     data["access"] = refresh.access_token
-    #     return data
+    def validate(self, attr):
+        data = super().validate(attr)
+        refresh = self.get_token(self.user)
+        user = {
+            "uuid" : self.user.id,
+            "from" : settings.DATABASES["default"]["NAME"],
+            "role": "admin",# estos es importante para poder logear
+            "data": {
+                "displayName": self.user.name,
+                "photoURL": "",
+                "email": self.user.email,
+                "settings":{
+                    "layout": { },
+                    "theme": { }
+                },
+                "shortcuts": []
+            }
+        }
+        #print(settings.DATABASES)
+        data['user'] = user
+        #data['user']["data"]["from"] = settings.DATABASES["default"]["NAME"]
+        data["refresh"] = str(refresh)
+        data["access_token"] = str(refresh.access_token)
+        return data
 
 class MyTokenRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):

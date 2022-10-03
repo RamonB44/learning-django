@@ -1,6 +1,7 @@
 asgiref==3.5.2
 backports.zoneinfo==0.2.1
 Django==4.1.1
+django-cors-headers==3.13.0
 djangorestframework==3.13.0
 djangorestframework-simplejwt==5.2.0
 mysqlclient==2.1.1
