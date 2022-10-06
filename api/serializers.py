@@ -1,8 +1,9 @@
-from rest_framework import serializers
+from rest_framework import exceptions, serializers
 from rest_framework_simplejwt.tokens import RefreshToken, Token
 from .models import UserData
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer,TokenRefreshSerializer
 from rest_framework_simplejwt.state import token_backend
+from rest_framework.exceptions import ValidationError
 from django.conf import settings
 
 class UserSerializer(serializers.ModelSerializer):
@@ -36,10 +37,11 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attr):
         data = super().validate(attr)
         refresh = self.get_token(self.user)
+        user_group = self.user.groups.values_list('name', flat=True)[0]
         user = {
             "uuid" : self.user.id,
-            "from" : settings.DATABASES["default"]["NAME"],
-            "role": "admin",# estos es importante para poder logear
+            "from" : "",
+            "role": user_group,# estos es importante para poder logear
             "data": {
                 "displayName": self.user.name,
                 "photoURL": "",
