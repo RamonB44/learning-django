@@ -93,7 +93,8 @@ DATABASES = {
         'HOST': '127.0.0.1',  
         'PORT': '3306',  
         'OPTIONS': {  
-            'init_command': "SET default_storage_engine=INNODB"  
+            'init_command': "SET default_storage_engine=INNODB",
+            'sql_mode': 'traditional'
         }    
     },
     'sqllite': {
@@ -152,6 +153,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'EXCEPTION_HANDLER': 'api.utils.custom_exception_handler'
 }
 
 SIMPLE_JWT = {
@@ -160,6 +162,7 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,
     'ALGORITHM': 'HS256',
+    'USER_AUTHENTICATION_RULE': 'api.utils.custom_user_authentication_rule', # this is what I was talking about
 }
 
 CORS_ALLOWED_ORIGIN_REGEXES = [

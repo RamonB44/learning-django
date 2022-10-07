@@ -21,16 +21,19 @@ class RegisterView(APIView):
         serializer.save()
         
         data = serializer.validated_data
+        
         user = authenticate(email=data['email'], password=data['password'])
+        
         refresh = RefreshToken.for_user(user)
+        user_group = user.groups.values_list('name', flat=True)[0]
         data = {
                 'user':{
                     "uuid" : user.id,
                     "from" : "",
-                    "role": "admin",# estos es importante para poder logear
+                    "role": user_group,# estos es importante para poder logear
                     "data": {
                         "displayName": user.name,
-                        "photoURL": "",
+                        "photoURL": user.photoURL,
                         "email": user.email,
                         "settings":{
                             "layout": { },
@@ -60,14 +63,15 @@ class MyLoginToken(APIView):
             user , token = res
             #aqui debe refrescarse la sesion
             #print(user.password)
+            user_group = user.groups.values_list('name', flat=True)[0]
             data = {
                 'user':{
                     "uuid" : user.id,
                     "from" : "",
-                    "role": "admin",# estos es importante para poder logear
+                    "role": user_group,# estos es importante para poder logear
                     "data": {
                         "displayName": user.name,
-                        "photoURL": "",
+                        "photoURL": user.photoURL,
                         "email": user.email,
                         "settings":{
                             "layout": { },
