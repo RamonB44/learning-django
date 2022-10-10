@@ -57,7 +57,7 @@ class MyLoginToken(APIView):
         if res is not None:
             user , _token = res
             #add to blacklist
-            invalidate_token = RefreshToken(request.data.refresh)
+            invalidate_token = RefreshToken(request.data['refresh'])
             invalidate_token.verify()
             invalidate_token.blacklist()
             # generate a new access and refresh token
