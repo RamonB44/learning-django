@@ -17,6 +17,7 @@ class RegisterView(APIView):
         dt = request.data
         dt["name"] = dt["displayName"]
         
+        
         serializer = UserSerializer(data=dt)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -29,11 +30,11 @@ class RegisterView(APIView):
         user_group = user.groups.values_list('name', flat=True)[0]
         structure = open('./api/user_data.json')
         data = json.load(structure)
-        data['user']['uuid'] = self.user.id
+        data['user']['uuid'] = user.id
         data['user']['role'] = user_group
-        data['user']['data']['displayName'] =  self.user.name
-        data['user']['data']['photoURL'] =  self.user.photoURL
-        data['user']['data']['email'] =  self.user.email
+        data['user']['data']['displayName'] =  user.name
+        data['user']['data']['photoURL'] =  user.photoURL
+        data['user']['data']['email'] =  user.email
         data['user']['data']['settings']['customScrollbars'] = True
         data["refresh"] = str(refresh)
         data["access_token"] = str(refresh.access_token)
@@ -50,13 +51,13 @@ class RegisterView(APIView):
         pass
     
 class MyLoginToken(APIView):
-    def get(self, request):
+    def post(self, request):
         # checks the validity of the token in the header and returns both the token and user data
         res = JWT_authenticator.authenticate(request)
         if res is not None:
             user , _token = res
             #add to blacklist
-            invalidate_token = RefreshToken(request.data.access_token)
+            invalidate_token = RefreshToken(request.data.refresh)
             invalidate_token.verify()
             invalidate_token.blacklist()
             # generate a new access and refresh token
@@ -74,8 +75,17 @@ class MyLoginToken(APIView):
             data['user']['data']['settings']['customScrollbars'] = True
             data["refresh"] = str(refresh)
             data["access_token"] = str(refresh.access_token)
-            return Response(data)
+            return Response(data, status= status.HTTP_200_OK)
     
+class CheckToken(APIView):
+    def post(self, request):
+        res = JWT_authenticator.authenticate(request)
+        if res is not None:
+            user , _token = res
+            data = { "access_token" : _token }
+            return Response(data , status= status.HTTP_200_OK)
+        return Response({"access_token" : ""} , status= status.HTTP_200_OK )
+
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
     

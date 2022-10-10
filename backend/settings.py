@@ -162,6 +162,7 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION' : True,
     'ALGORITHM': 'HS256',
     'USER_AUTHENTICATION_RULE': 'api.utils.custom_user_authentication_rule', # this is what I was talking about
 }

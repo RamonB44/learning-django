@@ -18,6 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
         user = UserData.objects.create(email=validated_data['email'],
                                        name=validated_data['name']
                                          )
+        user.groups.add(3)#registra al nuevo usuario con rol de usuario
         user.set_password(validated_data['password'])
         user.save()
         return user
@@ -49,7 +50,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         #check if credentials is valid if not raise AuthenticationFailed
         super().validate(attrs)
         #get refresh & token from user
-        refresh = self.get_token(self.user)
+        refresh = RefreshToken.for_user(self.user)
         #get group name from user
         user_group = self.user.groups.values_list('name', flat=True)[0]
         structure = open('./api/user_data.json')
@@ -67,7 +68,11 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 class MyTokenRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
-        decoded_payload = token_backend.decode(data['access'], verify=True)
+        token_backend.decode(data['access'], verify=True)
+        data = {
+            'access_token' : data['access'],
+            'refresh' : data['refresh']
+        }
         #print(decoded_payload)
         # user_uid = decoded_payload['user_id']
         # add filter query
