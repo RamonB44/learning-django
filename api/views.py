@@ -1,10 +1,11 @@
+import json
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.views import APIView
 from .serializers import MyTokenObtainPairSerializer, MyTokenRefreshSerializer, UserSerializer
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView
-from rest_framework_simplejwt.tokens import RefreshToken, Token
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
@@ -26,24 +27,16 @@ class RegisterView(APIView):
         
         refresh = RefreshToken.for_user(user)
         user_group = user.groups.values_list('name', flat=True)[0]
-        data = {
-                'user':{
-                    "uuid" : user.id,
-                    "from" : "",
-                    "role": user_group,# estos es importante para poder logear
-                    "data": {
-                        "displayName": user.name,
-                        "photoURL": user.photoURL,
-                        "email": user.email,
-                        "settings":{
-                            "layout": { },
-                            "theme": { }
-                        },
-                        "shortcuts": []
-                    }
-                },
-                'access_token' : str(refresh.access_token)
-            }
+        structure = open('./api/user_data.json')
+        data = json.load(structure)
+        data['user']['uuid'] = self.user.id
+        data['user']['role'] = user_group
+        data['user']['data']['displayName'] =  self.user.name
+        data['user']['data']['photoURL'] =  self.user.photoURL
+        data['user']['data']['email'] =  self.user.email
+        data['user']['data']['settings']['customScrollbars'] = True
+        data["refresh"] = str(refresh)
+        data["access_token"] = str(refresh.access_token)
 
         return Response(data, status= status.HTTP_200_OK)
         
@@ -58,30 +51,29 @@ class RegisterView(APIView):
     
 class MyLoginToken(APIView):
     def get(self, request):
+        # checks the validity of the token in the header and returns both the token and user data
         res = JWT_authenticator.authenticate(request)
         if res is not None:
-            user , token = res
-            #aqui debe refrescarse la sesion
-            #print(user.password)
+            user , _token = res
+            #add to blacklist
+            invalidate_token = RefreshToken(request.data.access_token)
+            invalidate_token.verify()
+            invalidate_token.blacklist()
+            # generate a new access and refresh token
+            refresh = RefreshToken.for_user(user)
+            # the new desired expiration time for the new token is added
+            # refresh.set_exp()
             user_group = user.groups.values_list('name', flat=True)[0]
-            data = {
-                'user':{
-                    "uuid" : user.id,
-                    "from" : "",
-                    "role": user_group,# estos es importante para poder logear
-                    "data": {
-                        "displayName": user.name,
-                        "photoURL": user.photoURL,
-                        "email": user.email,
-                        "settings":{
-                            "layout": { },
-                            "theme": { }
-                        },
-                        "shortcuts": []
-                    }
-                },
-                'access_token' : str(token)
-            }
+            structure = open('./api/user_data.json')
+            data = json.load(structure)
+            data['user']['uuid'] = user.id
+            data['user']['role'] = user_group
+            data['user']['data']['displayName'] =  user.name
+            data['user']['data']['photoURL'] =  user.photoURL
+            data['user']['data']['email'] =  user.email
+            data['user']['data']['settings']['customScrollbars'] = True
+            data["refresh"] = str(refresh)
+            data["access_token"] = str(refresh.access_token)
             return Response(data)
     
 class MyTokenObtainPairView(TokenObtainPairView):

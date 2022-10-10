@@ -11,7 +11,7 @@ def custom_exception_handler(exc, context):
     # to get the standard error response.
     response = exception_handler(exc, context)
     # Now add the HTTP status code to the response.
-    print(exc.get_codes())
+    #print(exc.get_codes())
     if response is not None:
         if exc.get_codes() == "no_active_account":
             response.status_code = 200

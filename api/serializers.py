@@ -4,9 +4,9 @@ from .models import UserData
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer,TokenRefreshSerializer
 from rest_framework_simplejwt.state import token_backend
 from rest_framework.exceptions import ValidationError
-from django.conf import settings
 from django.contrib.auth import authenticate
 from django.core.exceptions import ObjectDoesNotExist
+import json
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -39,34 +39,27 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         #check first if email exists
         try:
-            UserData.objects.get(email=self.username_field)
+            #print(attrs[self.username_field])
+            UserData.objects.get(email=attrs[self.username_field])
         except ObjectDoesNotExist:
             raise exceptions.AuthenticationFailed(
                 "Email incorrecto",
                 "no_email_account",
             )
-        #check if credentials is valid
-        data = super().validate(attrs)
+        #check if credentials is valid if not raise AuthenticationFailed
+        super().validate(attrs)
         #get refresh & token from user
         refresh = self.get_token(self.user)
         #get group name from user
         user_group = self.user.groups.values_list('name', flat=True)[0]
-        user = {
-            "uuid" : self.user.id,
-            "from" : "",
-            "role": user_group,# estos es importante para poder logear
-            "data": {
-                "displayName": self.user.name,
-                "photoURL": self.user.photoURL,
-                "email": self.user.email,
-                "settings":{
-                    "layout": { },
-                    "theme": { }
-                },
-                "shortcuts": []
-            }
-        }
-        data['user'] = user
+        structure = open('./api/user_data.json')
+        data = json.load(structure)
+        data['user']['uuid'] = self.user.id
+        data['user']['role'] = user_group
+        data['user']['data']['displayName'] =  self.user.name
+        data['user']['data']['photoURL'] =  self.user.photoURL
+        data['user']['data']['email'] =  self.user.email
+        data['user']['data']['settings']['customScrollbars'] = True
         data["refresh"] = str(refresh)
         data["access_token"] = str(refresh.access_token)
         return data
