@@ -164,10 +164,18 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION' : True,
+    
     'ALGORITHM': 'HS256',
-    'USER_AUTHENTICATION_RULE': 'api.utils.custom_user_authentication_rule', # this is what I was talking about
-}
+    'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule', # this is what I was talking about
 
+    # custom
+    'AUTH_COOKIE': 'access_token',  # Cookie name. Enables cookies if value is set.
+    'AUTH_COOKIE_DOMAIN': None,     # A string like "example.com", or None for standard domain cookie.
+    'AUTH_COOKIE_SECURE': False,    # Whether the auth cookies should be secure (https:// only).
+    'AUTH_COOKIE_HTTP_ONLY' : True, # Http only cookie flag.It's not fetch by javascript.
+    'AUTH_COOKIE_PATH': '/',        # The path of the auth cookie.
+    'AUTH_COOKIE_SAMESITE': 'Lax',  # Whether to set the flag restricting cookie leaks on cross-site requests. This can be 'Lax', 'Strict', or None to disable the flag.
+}
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -175,6 +183,6 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
     'http://localhost:3000',
 ]
 
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    'http://localhost:3000',
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
 ]

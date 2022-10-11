@@ -24,9 +24,6 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
     
-    def update(self, validated_data):
-        pass
-    
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     
     @classmethod
@@ -65,7 +62,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         res = Response(data, status = status.HTTP_200_OK)
         res.set_cookie("access_token", str(refresh.access_token), max_age=settings.SIMPLE_JWT.get('ACCESS_TOKEN_LIFETIME').total_seconds(),samesite='lax',secure=False, httponly=True)
         res.set_cookie("refresh", str(refresh), max_age=settings.SIMPLE_JWT.get('REFRESH_TOKEN_LIFETIME').total_seconds(),samesite='lax',secure=False, httponly=True)
-        return data
+        return res
 
 class MyTokenRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
