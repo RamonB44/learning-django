@@ -152,7 +152,8 @@ AUTH_USER_MODEL = 'api.UserData'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        #'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'api.authentication.CookieHandlerJWTAuthentication',
     ),
     'EXCEPTION_HANDLER': 'api.utils.custom_exception_handler'
 }
@@ -166,6 +167,13 @@ SIMPLE_JWT = {
     'ALGORITHM': 'HS256',
     'USER_AUTHENTICATION_RULE': 'api.utils.custom_user_authentication_rule', # this is what I was talking about
 }
+
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    'http://localhost:3000',
+]
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
     'http://localhost:3000',

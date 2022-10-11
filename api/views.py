@@ -76,15 +76,6 @@ class MyLoginToken(APIView):
             data["refresh"] = str(refresh)
             data["access_token"] = str(refresh.access_token)
             return Response(data, status= status.HTTP_200_OK)
-    
-class CheckToken(APIView):
-    def post(self, request):
-        res = JWT_authenticator.authenticate(request)
-        if res is not None:
-            user , _token = res
-            data = { "access_token" : _token }
-            return Response(data , status= status.HTTP_200_OK)
-        return Response({"access_token" : ""} , status= status.HTTP_200_OK )
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer

@@ -1,12 +1,13 @@
-from rest_framework import exceptions, serializers
-from rest_framework_simplejwt.tokens import RefreshToken, Token
+from rest_framework import exceptions, serializers, status
+from rest_framework_simplejwt.tokens import RefreshToken
 from .models import UserData
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer,TokenRefreshSerializer
 from rest_framework_simplejwt.state import token_backend
-from rest_framework.exceptions import ValidationError
-from django.contrib.auth import authenticate
 from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.response import Response
+from django.conf import settings
 import json
+
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -61,8 +62,9 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data['user']['data']['photoURL'] =  self.user.photoURL
         data['user']['data']['email'] =  self.user.email
         data['user']['data']['settings']['customScrollbars'] = True
-        data["refresh"] = str(refresh)
-        data["access_token"] = str(refresh.access_token)
+        res = Response(data, status = status.HTTP_200_OK)
+        res.set_cookie("access_token", str(refresh.access_token), max_age=settings.SIMPLE_JWT.get('ACCESS_TOKEN_LIFETIME').total_seconds(),samesite='lax',secure=False, httponly=True)
+        res.set_cookie("refresh", str(refresh), max_age=settings.SIMPLE_JWT.get('REFRESH_TOKEN_LIFETIME').total_seconds(),samesite='lax',secure=False, httponly=True)
         return data
 
 class MyTokenRefreshSerializer(TokenRefreshSerializer):
