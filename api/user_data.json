@@ -1,20 +1,17 @@
 {
-    "user":{
-        "uuid" : "",
-        "from" : "",
-        "role": "",
-        "data": {
-            "displayName": "",
-            "photoURL": "",
-            "email": "",
-            "settings":{
-                "layout": { },
-                "theme": { },
-                "customScrollbars": "False"
-            },
-            "shortcuts": []
-        }
-    },
-    "access_token": "",
-    "refresh": ""
+    "uuid" : "",
+    "from" : "",
+    "role": "",
+    "data": {
+        "displayName": "",
+        "photoURL": "",
+        "email": "",
+        "settings":{
+            "layout": { },
+            "theme": { },
+            "customScrollbars": "False"
+        },
+        "shortcuts": []
+    }
 }
+
