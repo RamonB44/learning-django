@@ -27,15 +27,22 @@ class CookieHandlerJWTAuthentication(JWTAuthentication):
         header = self.get_header(request)
         
         if header is None:
+            # print("no hay header")
             raw_token = request.COOKIES.get(settings.SIMPLE_JWT['AUTH_COOKIE']) or None
+            
         else:
+            # print("existe header")
             raw_token = self.get_raw_token(header)
             
         if raw_token is None:
             return None
         
+        #print(raw_token)
+        
         # csfr = request.COOKIES.get("csfrtoken") or None
         validated_token = self.get_validated_token(raw_token)
+        
+        #print(validated_token)
         
         enforce_csrf(request)
         

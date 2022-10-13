@@ -127,6 +127,9 @@ class MyLoginView(APIView):
             #validar si usuario existe
             return Response({"Invalid" : "Invalid username or password!!"}, status=status.HTTP_401_UNAUTHORIZED)
 
+class CheckToken(APIView):
+    def get(self, request):
+        pass
 # JWT_authenticator = JWTAuthentication()
 # class MyLoginToken(APIView):
 #     def post(self, request):
