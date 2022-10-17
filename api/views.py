@@ -129,7 +129,9 @@ class MyLoginView(APIView):
 
 class CheckToken(APIView):
     def get(self, request):
-        pass
+        res = Response()
+        res.data = { 'is_valid' : True ,}
+        return res
 # JWT_authenticator = JWTAuthentication()
 # class MyLoginToken(APIView):
 #     def post(self, request):

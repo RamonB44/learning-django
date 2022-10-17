@@ -11,7 +11,7 @@ def custom_exception_handler(exc, context):
     # to get the standard error response.
     response = exception_handler(exc, context)
     # Now add the HTTP status code to the response.
-    #print(exc.get_codes())
+    # print(exc.get_codes()['code'])
     if response is not None:
         if exc.get_codes() == "no_active_account":
             response.status_code = 200
@@ -26,6 +26,13 @@ def custom_exception_handler(exc, context):
                 {
                     'type': 'email',
                     'message': 'Correo no encontrado',
+                }]
+        elif exc.get_codes()['code'] == 'token_not_valid':
+            response.status_code = 200
+            response.data['error'] = [
+                {
+                    'type': 'token_not_valid',
+                    'message': exc.get_codes()['detail']
                 }]
         
     return response

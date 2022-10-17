@@ -7,6 +7,7 @@ from rest_framework import exceptions
 def enforce_csrf(request):
     check = CSRFCheck(dummy_get_response)
     check.process_request(request)
+
     reason = check.process_view(request, None, (), {})
     if reason:
         raise exceptions.PermissionDenied('CSRF Failed: %s' % reason)
@@ -27,11 +28,11 @@ class CookieHandlerJWTAuthentication(JWTAuthentication):
         header = self.get_header(request)
         
         if header is None:
-            # print("no hay header")
+            print("no hay header")
             raw_token = request.COOKIES.get(settings.SIMPLE_JWT['AUTH_COOKIE']) or None
             
         else:
-            # print("existe header")
+            print("existe header")
             raw_token = self.get_raw_token(header)
             
         if raw_token is None:
