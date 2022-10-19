@@ -1,3 +1,4 @@
+from pickle import FALSE
 from rest_framework.views import exception_handler
 
 def rename(self,key,new_key):
@@ -13,6 +14,7 @@ def custom_exception_handler(exc, context):
     # Now add the HTTP status code to the response.
     # print(exc.get_codes()['code'])
     if response is not None:
+        # print(exc.get_codes()['code'])
         if exc.get_codes() == "no_active_account":
             response.status_code = 200
             response.data['error'] = [
@@ -32,8 +34,9 @@ def custom_exception_handler(exc, context):
             response.data['error'] = [
                 {
                     'type': 'token_not_valid',
-                    'message': exc.get_codes()['detail']
+                    'message': exc.detail['detail']
                 }]
+            response.data["is_valid"] = False
         
     return response
 

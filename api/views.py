@@ -132,30 +132,35 @@ class CheckToken(APIView):
         res = Response()
         res.data = { 'is_valid' : True ,}
         return res
+    
+class LogoutView(APIView):
+    def get(self,request):
+        pass
+    
 # JWT_authenticator = JWTAuthentication()
-# class MyLoginToken(APIView):
-#     def post(self, request):
-#         # checks the validity of the token in the header and returns both the token and user data
-#         res = JWT_authenticator.authenticate(request)
-#         if res is not None:
-#             user , _token = res
-#             #add to blacklist
-#             invalidate_token = RefreshToken(request.data['refresh'])
-#             invalidate_token.verify()
-#             invalidate_token.blacklist()
-#             # generate a new access and refresh token
-#             refresh = RefreshToken.for_user(user)
-#             # the new desired expiration time for the new token is added
-#             # refresh.set_exp()
-#             user_group = user.groups.values_list('name', flat=True)[0]
-#             structure = open('./api/user_data.json')
-#             data = json.load(structure)
-#             data['user']['uuid'] = user.id
-#             data['user']['role'] = user_group
-#             data['user']['data']['displayName'] =  user.name
-#             data['user']['data']['photoURL'] =  user.photoURL
-#             data['user']['data']['email'] =  user.email
-#             data['user']['data']['settings']['customScrollbars'] = True
-#             data["refresh"] = str(refresh)
-#             data["access_token"] = str(refresh.access_token)
-#             return Response(data, status= status.HTTP_200_OK)
+class MyLoginToken(APIView):
+    def post(self, request):
+        # checks the validity of the token in the header and returns both the token and user data
+
+        if res is not None:
+            user , _token = res
+            #add to blacklist
+            invalidate_token = RefreshToken(request.data['refresh'])
+            invalidate_token.verify()
+            invalidate_token.blacklist()
+            # generate a new access and refresh token
+            refresh = RefreshToken.for_user(user)
+            # the new desired expiration time for the new token is added
+            # refresh.set_exp()
+            user_group = user.groups.values_list('name', flat=True)[0]
+            structure = open('./api/user_data.json')
+            data = json.load(structure)
+            data['user']['uuid'] = user.id
+            data['user']['role'] = user_group
+            data['user']['data']['displayName'] =  user.name
+            data['user']['data']['photoURL'] =  user.photoURL
+            data['user']['data']['email'] =  user.email
+            data['user']['data']['settings']['customScrollbars'] = True
+            data["refresh"] = str(refresh)
+            data["access_token"] = str(refresh.access_token)
+            return Response(data, status= status.HTTP_200_OK)

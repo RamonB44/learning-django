@@ -16,23 +16,14 @@ def dummy_get_response(request):  # pragma: no cover
     return None
 
 class CookieHandlerJWTAuthentication(JWTAuthentication):
-    # def authenticate(self, request):
-    #     # If cookie contains access token, put it inside authorization header
-    #     access_token = request.COOKIES.get('access_token')
-    #     if(access_token):
-    #         request.META['HTTP_AUTHORIZATION'] = '{header_type} {access_token}'.format(
-    #             header_type=settings.SIMPLE_JWT['AUTH_HEADER_TYPES'][0], access_token=access_token)
-
-    #     return super().authenticate(request)
     def authenticate(self, request):
         header = self.get_header(request)
         
         if header is None:
-            print("no hay header")
+            # print("no hay header")
             raw_token = request.COOKIES.get(settings.SIMPLE_JWT['AUTH_COOKIE']) or None
-            
         else:
-            print("existe header")
+            # print("existe header")
             raw_token = self.get_raw_token(header)
             
         if raw_token is None:
