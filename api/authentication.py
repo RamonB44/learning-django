@@ -3,6 +3,7 @@ from django.conf import settings
 
 from rest_framework.authentication import CSRFCheck
 from rest_framework import exceptions
+from rest_framework_simplejwt.exceptions import AuthenticationFailed, InvalidToken, TokenError
 
 def enforce_csrf(request):
     check = CSRFCheck(dummy_get_response)
@@ -29,17 +30,15 @@ class CookieHandlerJWTAuthentication(JWTAuthentication):
         if raw_token is None:
             return None
         
-        #print(raw_token)
+        try:
+            validated_token = self.get_validated_token(raw_token)
+            enforce_csrf(request)
         
-        # csfr = request.COOKIES.get("csfrtoken") or None
-        validated_token = self.get_validated_token(raw_token)
-        
-        #print(validated_token)
-        
-        enforce_csrf(request)
-        
-        if(validated_token):
-            request.META['HTTP_AUTHORIZATION'] = '{header_type} {access_token}'.format(
-                header_type=settings.SIMPLE_JWT['AUTH_HEADER_TYPES'][0], access_token=validated_token)
+            if(validated_token):
+                request.META['HTTP_AUTHORIZATION'] = '{header_type} {access_token}'.format(
+                    header_type=settings.SIMPLE_JWT['AUTH_HEADER_TYPES'][0], access_token=validated_token)
 
-        return super().authenticate(request)
+            return super().authenticate(request)
+        except InvalidToken:
+            print("invalidToken")
+            return None

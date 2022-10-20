@@ -12,7 +12,7 @@ def custom_exception_handler(exc, context):
     # to get the standard error response.
     response = exception_handler(exc, context)
     # Now add the HTTP status code to the response.
-    # print(exc.get_codes()['code'])
+    # print(exc.get_codes())
     if response is not None:
         # print(exc.get_codes()['code'])
         if exc.get_codes() == "no_active_account":
@@ -35,14 +35,6 @@ def custom_exception_handler(exc, context):
                 {
                     'type': 'not_authenticated',
                     'message': 'Usuario no logeado',
-                }]
-            response.data["is_valid"] = False
-        elif exc.get_codes()['code'] == 'token_not_valid':
-            response.status_code = 200
-            response.data['error'] = [
-                {
-                    'type': 'token_not_valid',
-                    'message': exc.detail['detail']
                 }]
             response.data["is_valid"] = False
         

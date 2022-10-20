@@ -1,6 +1,5 @@
 from datetime import timedelta
 import json
-from re import I
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.views import APIView
@@ -12,6 +11,7 @@ from django.contrib.auth import authenticate
 from django.middleware import csrf
 from django.conf import settings
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.exceptions import AuthenticationFailed, InvalidToken, TokenError
 
 #    permission_classes = (IsAuthenticated,)
 def get_tokens_for_user(user):
@@ -166,19 +166,26 @@ class MyLoginToken(APIView):
     
 class MyTokenRefreshView(APIView):
     permission_classes = []
+    authentication_classes = []
     def post(self,request):
         res = Response()
+        try:
+            invalidate_token = RefreshToken(request.COOKIES.get(settings.SIMPLE_JWT['AUTH_REFRESH']) or None)
+            invalidate_token.verify()
+            newToken = invalidate_token.access_token
+            res.set_cookie(
+                key = settings.SIMPLE_JWT['AUTH_COOKIE'], 
+                value = newToken,
+                expires = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+                secure = settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+                httponly = settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+                samesite = settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
+            )
         
-        invalidate_token = RefreshToken(request.COOKIES.get(settings.SIMPLE_JWT['AUTH_REFRESH']) or None)
-        newToken = invalidate_token.access_token
-        invalidate_token.verify()
-        invalidate_token.blacklist()
-        res.set_cookie(
-            key = settings.SIMPLE_JWT['AUTH_COOKIE'], 
-            value = newToken,
-            expires = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
-            secure = settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
-            httponly = settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
-            samesite = settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
-        )
-        return res
+            res.data = {"message" : "RefreshToken valido"}
+            return res
+        except TokenError:
+            return Response({"message": "Refresh Token Expired"}, status.HTTP_400_BAD_REQUEST)
+        
+        
+        #print(newToken)
