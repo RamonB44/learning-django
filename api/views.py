@@ -1,5 +1,6 @@
 from datetime import timedelta
 import json
+from re import I
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.views import APIView
@@ -9,8 +10,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.middleware import csrf
-#from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.conf import settings
+from rest_framework.permissions import IsAuthenticated
 
 #    permission_classes = (IsAuthenticated,)
 def get_tokens_for_user(user):
@@ -21,6 +22,7 @@ def get_tokens_for_user(user):
     }
 # view for registering users
 class RegisterView(APIView):
+    permission_classes = []
     def post(self, request):
         dt = request.data
         dt["name"] = dt["displayName"]
@@ -69,6 +71,7 @@ class RegisterView(APIView):
         return res
 
 class MyLoginView(APIView):
+    permission_classes = []
     def post(self, request):
         data = request.data
         response = Response()
@@ -109,15 +112,6 @@ class MyLoginView(APIView):
                     samesite = settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
                 )
                 
-                # response.set_cookie(
-                #     key = "CSRF_COOKIE", 
-                #     value = data["refresh"],
-                #     expires = timedelta(days=365)
-                #     secure = settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
-                #     httponly = settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
-                #     samesite = settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
-                # )
-                
                 csrf.get_token(request)
                 response.data = {"Success" : "Login successfully","user":_data}
                 return response
@@ -125,42 +119,66 @@ class MyLoginView(APIView):
                 return Response({"No active" : "This account is not active!!"}, status=status.HTTP_404_NOT_FOUND)
         else:
             #validar si usuario existe
-            return Response({"Invalid" : "Invalid username or password!!"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"Invalid" : "Invalid username or password!!"}, status=status.HTTP_404_NOT_FOUND)
 
 class CheckToken(APIView):
+    permission_classes = [IsAuthenticated,]
     def get(self, request):
         res = Response()
         res.data = { 'is_valid' : True ,}
         return res
     
 class LogoutView(APIView):
-    def get(self,request):
+    permission_classes = [IsAuthenticated,]
+    def post(self,request):
         pass
     
 # JWT_authenticator = JWTAuthentication()
 class MyLoginToken(APIView):
+    permission_classes = [IsAuthenticated,]
     def post(self, request):
         # checks the validity of the token in the header and returns both the token and user data
-
-        if res is not None:
-            user , _token = res
-            #add to blacklist
-            invalidate_token = RefreshToken(request.data['refresh'])
-            invalidate_token.verify()
-            invalidate_token.blacklist()
-            # generate a new access and refresh token
-            refresh = RefreshToken.for_user(user)
-            # the new desired expiration time for the new token is added
-            # refresh.set_exp()
-            user_group = user.groups.values_list('name', flat=True)[0]
-            structure = open('./api/user_data.json')
-            data = json.load(structure)
-            data['user']['uuid'] = user.id
-            data['user']['role'] = user_group
-            data['user']['data']['displayName'] =  user.name
-            data['user']['data']['photoURL'] =  user.photoURL
-            data['user']['data']['email'] =  user.email
-            data['user']['data']['settings']['customScrollbars'] = True
-            data["refresh"] = str(refresh)
-            data["access_token"] = str(refresh.access_token)
-            return Response(data, status= status.HTTP_200_OK)
+        current_user = request.user
+        response = Response()
+        
+        refresh = RefreshToken(request.COOKIES.get(settings.SIMPLE_JWT['AUTH_REFRESH']) or None)
+        
+        user_group = current_user.groups.values_list('name', flat=True)[0]
+        structure = open('./api/user_data.json')
+        data = json.load(structure)
+        data['uuid'] = current_user.id
+        data['role'] = user_group
+        data['data']['displayName'] =  current_user.name
+        data['data']['photoURL'] =  current_user.photoURL
+        data['data']['email'] =  current_user.email
+        data['data']['settings']['customScrollbars'] = True
+        # csrf.get_token(request)
+        response.set_cookie(
+            key = settings.SIMPLE_JWT['AUTH_COOKIE'], 
+            value = refresh.access_token,
+            expires = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+            secure = settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+            httponly = settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+            samesite = settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
+        )
+        response.data = {"Success" : "Login JWT Token successfully", "user": data}
+        return response
+    
+class MyTokenRefreshView(APIView):
+    permission_classes = []
+    def post(self,request):
+        res = Response()
+        
+        invalidate_token = RefreshToken(request.COOKIES.get(settings.SIMPLE_JWT['AUTH_REFRESH']) or None)
+        newToken = invalidate_token.access_token
+        invalidate_token.verify()
+        invalidate_token.blacklist()
+        res.set_cookie(
+            key = settings.SIMPLE_JWT['AUTH_COOKIE'], 
+            value = newToken,
+            expires = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+            secure = settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+            httponly = settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+            samesite = settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
+        )
+        return res

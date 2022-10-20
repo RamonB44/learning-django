@@ -29,6 +29,14 @@ def custom_exception_handler(exc, context):
                     'type': 'email',
                     'message': 'Correo no encontrado',
                 }]
+        elif exc.get_codes() == 'not_authenticated':
+            response.status_code = 200
+            response.data['error'] = [
+                {
+                    'type': 'not_authenticated',
+                    'message': 'Usuario no logeado',
+                }]
+            response.data["is_valid"] = False
         elif exc.get_codes()['code'] == 'token_not_valid':
             response.status_code = 200
             response.data['error'] = [
