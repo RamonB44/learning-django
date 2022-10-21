@@ -131,7 +131,29 @@ class CheckToken(APIView):
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated,]
     def post(self,request):
-        pass
+        res = Response()
+        try:
+            invalidate_token = RefreshToken(request.COOKIES.get(settings.SIMPLE_JWT['AUTH_REFRESH']) or None)
+            invalidate_token.verify()
+            invalidate_token.blacklist()
+            
+            res.status_code = status.HTTP_200_OK
+            res.data = {"message": "Logout from Session"}
+            
+            res.delete_cookie(
+                key = settings.SIMPLE_JWT['AUTH_COOKIE'], 
+            )
+            
+            res.delete_cookie(
+                key = settings.SIMPLE_JWT['AUTH_REFRESH'], 
+            )
+            
+            res.delete_cookie(
+                key= "csrftoken"
+            )
+            return res
+        except TokenError:
+            return Response({"message": "Refresh Token Expired"}, status.HTTP_400_BAD_REQUEST)
     
 # JWT_authenticator = JWTAuthentication()
 class MyLoginToken(APIView):
@@ -172,7 +194,9 @@ class MyTokenRefreshView(APIView):
         try:
             invalidate_token = RefreshToken(request.COOKIES.get(settings.SIMPLE_JWT['AUTH_REFRESH']) or None)
             invalidate_token.verify()
+
             newToken = invalidate_token.access_token
+            
             res.set_cookie(
                 key = settings.SIMPLE_JWT['AUTH_COOKIE'], 
                 value = newToken,
