@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 import json
 from django.shortcuts import render
 from rest_framework import status
@@ -97,7 +97,7 @@ class MyLoginView(APIView):
                 response.set_cookie(
                     key = settings.SIMPLE_JWT['AUTH_COOKIE'], 
                     value = data["access-token"],
-                    expires = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+                    expires = datetime.now()+settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
                     secure = settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
                     httponly = settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
                     samesite = settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
@@ -106,7 +106,7 @@ class MyLoginView(APIView):
                 response.set_cookie(
                     key = settings.SIMPLE_JWT['AUTH_REFRESH'], 
                     value = data["refresh"],
-                    expires = settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'],
+                    expires = datetime.now()+settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'],
                     secure = settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
                     httponly = settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
                     samesite = settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']

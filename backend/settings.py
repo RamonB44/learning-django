@@ -32,7 +32,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -191,7 +190,7 @@ SIMPLE_JWT = {
 
     # custom
     'AUTH_COOKIE': 'access_token',  # Cookie name. Enables cookies if value is set.
-    'AUTH_REFRESH' :  'refresh',
+    'AUTH_REFRESH' :  'refresh_token',
     'AUTH_COOKIE_DOMAIN': None,     # A string like "example.com", or None for standard domain cookie.
     'AUTH_COOKIE_SECURE': False,    # Whether the auth cookies should be secure (https:// only).
     'AUTH_COOKIE_HTTP_ONLY' : True, # Http only cookie flag.It's not fetch by javascript.
@@ -202,15 +201,15 @@ SIMPLE_JWT = {
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
-    'http://localhost:3000',
+    'http://localhost:4200',
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
+    "http://localhost:4200",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
+    "http://localhost:4200",
 ]
 
 CSRF_COOKIE_NAME = "csrftoken"
