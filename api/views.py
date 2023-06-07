@@ -47,6 +47,7 @@ class RegisterView(APIView):
         _data['user']['data']['photoURL'] =  user.photoURL
         _data['user']['data']['email'] =  user.email
         _data['user']['data']['settings']['customScrollbars'] = True
+        _data['expDate'] = datetime.now()+settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
         
         res.set_cookie(
             key = settings.SIMPLE_JWT['AUTH_COOKIE'], 
@@ -93,6 +94,7 @@ class MyLoginView(APIView):
                 _data['data']['photoURL'] =  user.photoURL
                 _data['data']['email'] =  user.email
                 _data['data']['settings']['customScrollbars'] = True
+                _data['expDate'] = datetime.now()+settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
                 
                 response.set_cookie(
                     key = settings.SIMPLE_JWT['AUTH_COOKIE'], 
@@ -174,6 +176,7 @@ class MyLoginToken(APIView):
         data['data']['photoURL'] =  current_user.photoURL
         data['data']['email'] =  current_user.email
         data['data']['settings']['customScrollbars'] = True
+        data['expDate'] = datetime.now()+settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
         # csrf.get_token(request)
         response.set_cookie(
             key = settings.SIMPLE_JWT['AUTH_COOKIE'], 
@@ -194,19 +197,19 @@ class MyTokenRefreshView(APIView):
         try:
             invalidate_token = RefreshToken(request.COOKIES.get(settings.SIMPLE_JWT['AUTH_REFRESH']) or None)
             invalidate_token.verify()
-
-            newToken = invalidate_token.access_token
             
+            newToken = invalidate_token.access_token
+
             res.set_cookie(
                 key = settings.SIMPLE_JWT['AUTH_COOKIE'], 
                 value = newToken,
-                expires = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+                expires = datetime.now()+settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
                 secure = settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
                 httponly = settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
                 samesite = settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
             )
         
-            res.data = {"message" : "RefreshToken valido"}
+            res.data = {"message" : "RefreshToken valido", 'expDate' : datetime.now()+settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']}
             return res
         except TokenError:
             return Response({"message": "Refresh Token Expired"}, status.HTTP_400_BAD_REQUEST)

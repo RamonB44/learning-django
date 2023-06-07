@@ -2,6 +2,7 @@
     "uuid" : "",
     "from" : "",
     "role": "",
+    "expDate": "",
     "data": {
         "displayName": "",
         "photoURL": "",
@@ -14,4 +15,3 @@
         "shortcuts": []
     }
 }
-
