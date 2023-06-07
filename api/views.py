@@ -41,13 +41,14 @@ class RegisterView(APIView):
         structure = open('./api/user_data.json')
         
         _data = json.load(structure)
-        _data['user']['uuid'] = user.id
-        _data['user']['role'] = user_group
-        _data['user']['data']['displayName'] =  user.name
-        _data['user']['data']['photoURL'] =  user.photoURL
-        _data['user']['data']['email'] =  user.email
-        _data['user']['data']['settings']['customScrollbars'] = True
+        _data['uuid'] = user.id
+        _data['role'] = user_group
+        _data['userData']['displayName'] =  user.name
+        _data['userData']['photoURL'] =  user.photoURL
+        _data['userData']['email'] =  user.email
+        _data['userData']['settings']['customScrollbars'] = True
         _data['expDate'] = datetime.now()+settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
+        _data['message'] = "Register Successfully"
         
         res.set_cookie(
             key = settings.SIMPLE_JWT['AUTH_COOKIE'], 
@@ -68,7 +69,7 @@ class RegisterView(APIView):
         )
                 
         csrf.get_token(request)
-        res.data = { "Success" : "Usuario registrado", "user": _data }
+        res.data = _data
         return res
 
 class MyLoginView(APIView):
@@ -90,11 +91,12 @@ class MyLoginView(APIView):
                 _data = json.load(structure)
                 _data['uuid'] = user.id
                 _data['role'] = user_group
-                _data['data']['displayName'] =  user.name
-                _data['data']['photoURL'] =  user.photoURL
-                _data['data']['email'] =  user.email
-                _data['data']['settings']['customScrollbars'] = True
+                _data['userData']['displayName'] =  user.name
+                _data['userData']['photoURL'] =  user.photoURL
+                _data['userData']['email'] =  user.email
+                _data['userData']['settings']['customScrollbars'] = True
                 _data['expDate'] = datetime.now()+settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
+                _data['message'] = "Login Successfully"
                 
                 response.set_cookie(
                     key = settings.SIMPLE_JWT['AUTH_COOKIE'], 
@@ -115,7 +117,7 @@ class MyLoginView(APIView):
                 )
                 
                 csrf.get_token(request)
-                response.data = {"Success" : "Login successfully","user":_data}
+                response.data = _data
                 return response
             else:
                 return Response({"No active" : "This account is not active!!"}, status=status.HTTP_404_NOT_FOUND)
@@ -172,11 +174,12 @@ class MyLoginToken(APIView):
         data = json.load(structure)
         data['uuid'] = current_user.id
         data['role'] = user_group
-        data['data']['displayName'] =  current_user.name
-        data['data']['photoURL'] =  current_user.photoURL
-        data['data']['email'] =  current_user.email
-        data['data']['settings']['customScrollbars'] = True
+        data['userData']['displayName'] =  current_user.name
+        data['userData']['photoURL'] =  current_user.photoURL
+        data['userData']['email'] =  current_user.email
+        data['userData']['settings']['customScrollbars'] = True
         data['expDate'] = datetime.now()+settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
+        data['message'] = "Login JWT Token successfully"
         # csrf.get_token(request)
         response.set_cookie(
             key = settings.SIMPLE_JWT['AUTH_COOKIE'], 
@@ -186,7 +189,7 @@ class MyLoginToken(APIView):
             httponly = settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
             samesite = settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
         )
-        response.data = {"Success" : "Login JWT Token successfully", "user": data}
+        response.data = data
         return response
     
 class MyTokenRefreshView(APIView):
