@@ -45,4 +45,3 @@ class UserData(AbstractUser):
 
     def __str__(self):
         return self.name
-    

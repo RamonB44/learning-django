@@ -1,6 +1,6 @@
 from rest_framework import exceptions, serializers, status
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import UserData
+from .models import UserData, Epp
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer,TokenRefreshSerializer
 from rest_framework_simplejwt.state import token_backend
 from django.core.exceptions import ObjectDoesNotExist
